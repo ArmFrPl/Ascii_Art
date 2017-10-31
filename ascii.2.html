@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Ascii Art</title>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.4.0/knockout-min.js"></script>
+        <script src="jquery-3.1.1.min.js"></script>
+    </head>
+    <body>
+        <style>
+
+            body {
+                margin:0px;
+                padding:0px;
+            }
+            
+            #ascii {
+            	font-family: monospace;
+            	font-size: 12px;
+            	line-height: 90%;
+            }
+            
+            #sprite {
+            	display: none;
+            }
+            
+            #container {
+            	overflow: hidden;
+            	display: block;
+            	position:absolute;
+            	top:10%;
+            }
+            
+            #menudiv{
+                width: 400px;
+                height: 100px;
+                border: 2px solid #e6e21d;
+                background: #fff900;
+                border-radius: 10px;
+                z-index: 2;
+                padding: 3px;
+                position: absolute;
+                top: 10px;
+                left: 40%;
+            }
+            
+            #selector{
+                /*background-color:#5cb85c;*/
+                background-color: #5bc0de;
+                color:white;
+                z-index: 5;
+                position :absolute;
+                top:1%;
+            }
+            #selector:focus{
+                /*border-color:#449d44;*/
+                border-color:#4da4bd;
+                
+            }
+            option{
+                /*background: #fff900;*/
+                background: white;
+                color:#0275d8;
+                /*color: white;*/
+            }
+            #textarea{
+                
+                height: 70%;
+                width: 45%;
+                z-index: 5;
+                border-radius:5px;
+                position:absolute;
+                left:25%;
+                border: 1px solid #5bc0de;
+            }
+ 
+            #upload{
+                z-index: 5;
+                position: absolute;
+                left:25%;
+    
+            }
+            canvas{
+                position:absolute;   
+                bottom:0px;
+                right:0px;
+            }
+            pre{
+                overflow:hidden;
+                left:5%;
+            }
+            /*#submit{*/
+            /*    background-color: lightblue;*/
+            /*    position: absolute;*/
+            /*    z-index: 5;*/
+            /*    left:703px;*/
+            /*    top: 91px;*/
+            /*}*/
+            #button{
+                position: absolute;
+                right:0;
+                bottom:0;
+                z-index: 5;
+         
+            }
+        </style>
+        
+
+        
+        <!--<textarea id = "textarea" placeholder = "Type text... "></textarea>-->
+    <div id = "menudiv">
+            
+        <select data-bind="value: choose" class="custom-select" id = "selector">
+            <option value="1">Photo</option>
+            <option value="2">Text</option>
+        </select>
+        
+        <button id = "button" type="button" class="btn btn-outline-info">Generate</button>
+    </div>
+            
+        <img src="" width="200" id="sprite"/>
+        
+        <div id="container">
+            <pre id="ascii"></pre>
+        </div>
+
+
+        
+        
+        
+        <script>
+            var viewModel = {
+                        choose : ko.observable(1)
+    	            };
+    	            
+    	            ko.applyBindings(viewModel);
+            window.onload = function(){
+
+            document.getElementById("button").addEventListener('click',draw);
+            
+	        var canvas = document.createElement('canvas');
+            canvas.width = 216;
+            canvas.height = 160;
+            let W = 216;
+            let H = 160;
+            document.body.appendChild(canvas);
+            var ctx = canvas.getContext('2d');
+	        var isText = false;
+	        
+	        function start(){
+	          
+
+	            
+	        
+	            if(viewModel.choose() == "2"){
+	               // $('#textarea').change( function(event) {
+                      //  $("img").fadeIn("fast").attr('src',URL.createObjectURL(event.target.files[0]));
+                    //});
+	                if(document.getElementById('textarea') === null){
+	                    var textarea = document.createElement("textarea");
+    	                textarea.id = "textarea";
+    	                textarea.class="form-control";
+    	                document.getElementById('menudiv').appendChild(textarea);
+                        document.getElementById('menudiv').removeChild($('#upload')[0]);
+	                }
+                    isText = true;
+	            }else if (viewModel.choose() === "1"){
+	                $('#upload').change( function(event) {
+                        $("img").fadeIn("fast").attr('src',URL.createObjectURL(event.target.files[0]));
+                    });
+	                if(document.getElementById('upload') === null){
+	                    var input = document.createElement("input");
+                        input.type = "file";
+                        input.id = "upload";
+                        input.class = "custom-file-input";
+                        document.getElementById('menudiv').appendChild(input);
+                        var textarea = document.getElementById('textarea');
+                        if(textarea !== null){
+                            document.getElementById('menudiv').removeChild(textarea);                           
+                        }
+	                }
+	                isText = false;
+	            }
+            
+	        }
+	        
+	        
+	        function draw() {
+	            $('#sprite').css('display','none');
+	            
+	            var ascii = document.getElementById("ascii");
+	            var line = '';
+	            $('#ascii').html('');
+	            
+                    
+                    ctx.fillStyle = "white";
+                    ctx.fillRect(0, 0, W, H);
+                    if(isText){
+                        let str = $('#textarea').val();
+                        console.log(str);
+                        var count = Math.ceil(str.length/21);
+                        console.log(count);
+                        ctx.fillStyle = "black";
+                        ctx.font = "20px Georgia";
+                        for(var i = 0; i<count;i++){
+                            const part = str.substring(0,21);
+                            ctx.fillText(part,0,30+i*20);
+                            str = str.substring(21);
+                        }
+                    }else{
+                        ctx.drawImage(sprite, 0, 0, W, H);
+                        
+                    }
+                    
+                    var pixels = ctx.getImageData(0, 0, W, H);
+                    
+        	        var colordata = pixels.data;
+                    
+                    var line2 = $("<span></span>");
+                    
+                	for(var i = 0; i < colordata.length; i = i+4)
+                	{
+                		r = colordata[i];
+                		
+                		g = colordata[i+1];
+                		b = colordata[i+2];
+                        gray = r*0.2126 + g*0.7152 + b*0.0722;
+                        
+                        
+                        if(gray > 250){ character = " ";} 
+                		else if(gray > 230) {character = "K";}
+                		else if(gray > 210) {character = "7";}
+                		else if(gray > 190) {character = "S";}
+                		else if(gray > 170) {character = "L";}
+                		else if(gray > 150) {character = "2";}
+                		else if(gray > 130) {character = "e";}
+                		else if(gray > 110) {character = "U";}
+                		else if(gray > 90) {character = "a";}
+                		else if(gray > 70) {character = "5";}
+                		else if(gray > 50) {character = "9";}
+                		else {character = "X";}
+                		//line += character;
+                        var miHat = $('<span style="color:rgb('+r+','+g+','+b+');">'+character+"</span>");
+                        line2.append(miHat);
+                        
+                        if((i/4)%W == 0){
+                            //var line1 = document.createTextNode(line);
+                			$('#ascii').append(line2);
+                            var br = document.createElement("br");
+                			ascii.appendChild(br);
+                			line2 = $("<span></span>");;
+                        }
+    	            }
+        	    }
+        	    
+            setInterval(start,30);
+                // draw();
+            };
+        </script>
+    </body>
+</html>
